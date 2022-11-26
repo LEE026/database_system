@@ -256,7 +256,7 @@ public class Main {
 
     // 동선추가
     public static void insertMovement(String confirmation_id ,String name,String address,String dateOfVisit){
-        String Query="INSERT INTO Movement VALUES ('"+confirmation_id+"', '"+name+"', '"+address+"', "+dateOfVisit+");";
+        String Query="INSERT INTO Movement VALUES ('"+confirmation_id+"', '"+name+"', '"+address+"', '"+dateOfVisit+"');";
         try {
             stmt.executeUpdate(Query);
         } catch (SQLException e) {
