@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
@@ -33,7 +30,7 @@ public class Main {
         Scanner menu = new Scanner(System.in);
         Scanner input = new Scanner(System.in);
         int number = 0;
-
+        init("hslee","1234");//테스트 편의를 위한 문장, 제작종료후 삭제 예정
         while(true)
         {
             printMenu();
@@ -61,11 +58,19 @@ public class Main {
                     }else{
                         System.out.println("concentration!");
                     }
-                }
-                break;
-
-                case 2:
                     break;
+                }
+
+
+                case 2: {
+                    String confirmation_id=inputString(input,"enter confirmation id: ");
+                    if(!confirmation_id.isEmpty()) {
+                        findMovement(confirmation_id);
+                    }else{
+                        System.out.println("concentration!");
+                    }
+                    break;
+                }
 
                 case 3:
                     break;
@@ -126,11 +131,54 @@ public class Main {
         return true;
     }
 
+    public static void printLine(int cnt){
+        for(int i=0;i<cnt;i++){
+            System.out.printf("+-------------------------------");
+        }
+        System.out.println("+");
+    }
 
+    public static void printLine(int cnt, ResultSet rs) throws SQLException {
+        for(int i=1;i<=cnt;i++){
+            System.out.printf("| %-30s",rs.getString(i));
+        }
+        System.out.println("|");
+    }
+    //출력 방법 개선 필요
+    public static void printResult(ResultSet rs){
+        try {
+            ResultSetMetaData column=rs.getMetaData();
+            int cnt= column.getColumnCount();
+            printLine(cnt);
+            for(int i=0;i<cnt;i++){
+                System.out.printf("| %-30s",column.getColumnName(i+1));
+            }
+            System.out.println("|");
+            printLine(cnt);
+            while (rs.next()) {
+                printLine(cnt,rs);
+                printLine(cnt);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Query print fail");
+        }
+    }
 
     //확진자의 동선
     public static void findMovement(String confirmation_id){
-
+        String Query="select name, address, dateOfVisit, confirmation_disease_code \n" +
+                "from Movement natural join Confirmed_case \n" +
+                "where confirmation_id = "+confirmation_id+" \n" +
+                "order by dateOfVisit;";
+        try {
+            ResultSet rs=stmt.executeQuery(Query);
+            printResult(rs);
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println("Query fail");
+        }
     }
 
     //특정 업체의 기록
