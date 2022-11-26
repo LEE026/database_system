@@ -50,8 +50,8 @@ public class Main {
             switch(number) {
                 case 1: {
 
-                    String user=inputString(input,"enter user name: ");
-                    String pw=inputString(input, "enter user name: ");
+                    String user=inputString(input,"유저 이름: ");
+                    String pw=inputString(input, "비밀 번호: ");
 
                     if(!user.isEmpty()&&!pw.isEmpty()) {
                         init(user,pw);
@@ -63,7 +63,7 @@ public class Main {
 
 
                 case 2: {
-                    String confirmation_id=inputString(input,"enter confirmation id: ");
+                    String confirmation_id=inputString(input,"확진자 식별 번호: ");
                     if(!confirmation_id.isEmpty()) {
                         findMovement(confirmation_id);
                     }else{
@@ -75,8 +75,15 @@ public class Main {
                 case 3:
                     break;
 
-                case 4:
+                case 4: {
+                    String region=inputString(input,"확인을 원하는 지역: ");
+                    if(!region.isEmpty()) {
+                        confirmationRegion(region);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
                 case 5:
                     break;
@@ -132,7 +139,16 @@ public class Main {
     }
 
 
-
+    public static void printOneResult(ResultSet rs,ResultSetMetaData column, int cnt) {
+        for(int i=1;i<=cnt;i++){
+            try {
+                System.out.printf("%s: %s\n",column.getColumnLabel(i),rs.getString(i));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println();
+    }
 
     public static void printResult(ResultSet rs){
         try {
@@ -142,10 +158,7 @@ public class Main {
             int num=1;
             while (rs.next()) {
                 System.out.printf("#%d\n",num++);
-                for(int i=1;i<=cnt;i++){
-                    System.out.printf("%s: %s\n",column.getColumnLabel(i),rs.getString(i));
-                }
-                System.out.println();
+                printOneResult(rs,column,cnt);
             }
 
         } catch (Exception e) {
@@ -172,17 +185,43 @@ public class Main {
     }
 
     //특정 업체의 기록
-    public static void confirmationEnterprise(){
+    public static void confirmationEnterprise(String enterpriseName, String address){
+        String Query1="select name as \"업체\", address as \"업체 주소\", date as \"방역 일자\",  disinfection_company as \"방역 업체\"\n" +
+                "from Enterprise natural join Quarantine_information \n" +
+                "where name like \"%김포공항%\" and address like \"%방화동%\"\n" +
+                "order by date;";
+        String Query2="select name as \"업체\", address as \"업체 주소\", dateOfVisit as \"방문 일자\", confirmation_disease_code as \"확진된 질병\" \n" +
+                "from Movement natural join Confirmed_case \n" +
+                "where name like \"%김포공항%\" and address like \"%방화동%\"\n" +
+                "order by dateOfVisit;";
+        try {
+            ResultSet rs1=stmt.executeQuery(Query1);
+            ResultSet rs2=stmt.executeQuery(Query2);
 
+            rs1.close();
+            rs2.close();
+        } catch (SQLException e) {
+            System.out.println("Query fail");
+        }
+    }
+
+    //지역에서 발생중인 질병 리스트
+    public static void confirmationRegion(String region){
+        String Query="select confirmation_disease_code as \"질병\" \n" +
+                "from Movement natural join Confirmed_case \n" +
+                "where address like \"%"+region+"%\";";
+        try {
+            ResultSet rs=stmt.executeQuery(Query);
+            System.out.println(region+"에서 발생중인 질병 목록");
+            printResult(rs);
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println("Query fail");
+        }
     }
 
     //업체추가
     public static void insertEnterprise(){
-
-    }
-
-    //업체추가
-    public static void insertRegion(){
 
     }
 
