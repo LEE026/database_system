@@ -96,8 +96,10 @@ public class Main {
 
                 case 8:
                     break;
-                case 9:
+                case 9: {
+                    showNotQuarantinedEnterprise();
                     break;
+                }
                 case 10:
                     break;
 
@@ -241,7 +243,18 @@ public class Main {
 
     //방역되지 않은 업체
     public static void showNotQuarantinedEnterprise(){
-
+        String Query="select name as \"업체\", address as \"업체 주소\"\n" +
+                "from Movement m natural join Quarantine_information q\n" +
+                "where m.dateOfVisit > q.date\n" +
+                "order by dateOfVisit;";
+        try {
+            ResultSet rs=stmt.executeQuery(Query);
+            System.out.println("위험 업체 목록");
+            printResult(rs);
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println("Query fail");
+        }
     }
 
     //위험 업체와의 거리
