@@ -151,7 +151,7 @@ public class Main {
             int cnt= column.getColumnCount();
             printLine(cnt);
             for(int i=0;i<cnt;i++){
-                System.out.printf("| %-30s",column.getColumnName(i+1));
+                System.out.printf("| %-30s",column.getColumnLabel(i+1));
             }
             System.out.println("|");
             printLine(cnt);
@@ -168,10 +168,11 @@ public class Main {
 
     //확진자의 동선
     public static void findMovement(String confirmation_id){
-        String Query="select name, address, dateOfVisit, confirmation_disease_code \n" +
+        String Query="select "+
+                "name as \"업체\", address as \"업체 주소\", dateOfVisit as \"방문 일자\", confirmation_disease_code as \"확진된 질병\" \n" +
                 "from Movement natural join Confirmed_case \n" +
                 "where confirmation_id = "+confirmation_id+" \n" +
-                "order by dateOfVisit;";
+                "order by dateOfVisit;\n";
         try {
             ResultSet rs=stmt.executeQuery(Query);
             printResult(rs);
