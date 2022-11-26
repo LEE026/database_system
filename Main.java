@@ -131,33 +131,21 @@ public class Main {
         return true;
     }
 
-    public static void printLine(int cnt){
-        for(int i=0;i<cnt;i++){
-            System.out.printf("+-------------------------------");
-        }
-        System.out.println("+");
-    }
 
-    public static void printLine(int cnt, ResultSet rs) throws SQLException {
-        for(int i=1;i<=cnt;i++){
-            System.out.printf("| %-30s",rs.getString(i));
-        }
-        System.out.println("|");
-    }
-    //출력 방법 개선 필요
+
+
     public static void printResult(ResultSet rs){
         try {
             ResultSetMetaData column=rs.getMetaData();
             int cnt= column.getColumnCount();
-            printLine(cnt);
-            for(int i=0;i<cnt;i++){
-                System.out.printf("| %-30s",column.getColumnLabel(i+1));
-            }
-            System.out.println("|");
-            printLine(cnt);
+
+            int num=1;
             while (rs.next()) {
-                printLine(cnt,rs);
-                printLine(cnt);
+                System.out.printf("#%d\n",num++);
+                for(int i=1;i<=cnt;i++){
+                    System.out.printf("%s: %s\n",column.getColumnLabel(i),rs.getString(i));
+                }
+                System.out.println();
             }
 
         } catch (Exception e) {
@@ -175,6 +163,7 @@ public class Main {
                 "order by dateOfVisit;\n";
         try {
             ResultSet rs=stmt.executeQuery(Query);
+            System.out.println("\n확진자 "+confirmation_id+"의 동선\n");
             printResult(rs);
             rs.close();
         } catch (SQLException e) {
