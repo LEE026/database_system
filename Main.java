@@ -99,8 +99,19 @@ public class Main {
                     break;
                 }
 
-                case 6:
+                case 6:{
+                    System.out.println("추가할 동선 정보");
+                    String confirmation_id=inputString(input,"확진자 식별번호: ");
+                    String name=inputString(input,"업체 이름: ");
+                    String address=inputString(input,"업체 주소: ");
+                    String date=inputString(input,"방문 일자: ");
+                    if(!confirmation_id.isEmpty()&&!name.isEmpty()&&!address.isEmpty()&&!date.isEmpty()) {
+                        insertMovement(confirmation_id,name,address,date);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
                 case 7:
                     break;
@@ -245,7 +256,12 @@ public class Main {
 
     // 동선추가
     public static void insertMovement(String confirmation_id ,String name,String address,String dateOfVisit){
-        
+        String Query="INSERT INTO Movement VALUES ('"+confirmation_id+"', '"+name+"', '"+address+"', "+dateOfVisit+");";
+        try {
+            stmt.executeUpdate(Query);
+        } catch (SQLException e) {
+            System.out.println("insert fail");
+        }
     }
     //방역정보 추가
     public static void insertQuarantineInformation(){
