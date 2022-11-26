@@ -85,8 +85,19 @@ public class Main {
                     break;
                 }
 
-                case 5:
+                case 5: {
+                    System.out.println("추가할 업체 정보");
+                    String name=inputString(input,"업체 이름: ");
+                    String address=inputString(input,"업체 주소: ");
+                    String longitude=inputString(input,"경도: ");
+                    String latitude=inputString(input,"위도: ");
+                    if(!name.isEmpty()&&!address.isEmpty()) {
+                        insertEnterprise(name,address,longitude,latitude);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
                 case 6:
                     break;
@@ -223,13 +234,18 @@ public class Main {
     }
 
     //업체추가
-    public static void insertEnterprise(){
-
+    public static void insertEnterprise(String name,String address,String longitude, String latitude){
+        String Query="INSERT INTO Enterprise VALUES ('"+name+"',  '"+address+"', "+longitude+","+latitude+");";
+        try {
+            stmt.executeUpdate(Query);
+        } catch (SQLException e) {
+            System.out.println("insert fail");
+        }
     }
 
     // 동선추가
-    public static void insertMovement(){
-
+    public static void insertMovement(String confirmation_id ,String name,String address,String dateOfVisit){
+        
     }
     //방역정보 추가
     public static void insertQuarantineInformation(){
