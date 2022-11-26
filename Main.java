@@ -6,12 +6,32 @@ import java.util.Scanner;
 
 public class Main {
 
-    public void main(String args[])
+    public static void printMenu(){
+        System.out.println("                                                                               ");
+        System.out.println("                                                                               ");
+        System.out.println("-------------------------------------------------------------------------------");
+        System.out.println("                              동아리 인원 관리 프로그램                            ");
+        System.out.println("-------------------------------------------------------------------------------");
+        System.out.println("  1. connection                         2.  find movement                      ");
+        System.out.println("  3. confirmation enterprise            4.  confirmation region                ");
+        System.out.println("  5. insert enterprise                  6.  insert movement                    ");
+        System.out.println("  7. insert Quarantine information      8.  insert confirmed case              ");
+        System.out.println("  9. show not quarantined enterprise    10. Check distance to movement         ");
+        System.out.println("                                        99. quit                               ");
+        System.out.println("-------------------------------------------------------------------------------");
+    }
+
+
+
+    static Statement stmt;
+    static String mysqlAddress="192.168.56.101:4567";
+    static String databaseName="disease_notice_service";
+
+    public static void main(String args[])
     {
-        if(!init()) return;
 
         Scanner menu = new Scanner(System.in);
-        Scanner id_string = new Scanner(System.in);
+        Scanner input = new Scanner(System.in);
         int number = 0;
 
         while(true)
@@ -28,11 +48,21 @@ public class Main {
             }
 
 
-            String instance_id = "";
+
 
             switch(number) {
-                case 1:
-                    break;
+                case 1: {
+
+                    String user=inputString(input,"enter user name: ");
+                    String pw=inputString(input, "enter user name: ");
+
+                    if(!user.isEmpty()&&!pw.isEmpty()) {
+                        init(user,pw);
+                    }else{
+                        System.out.println("concentration!");
+                    }
+                }
+                break;
 
                 case 2:
                     break;
@@ -62,7 +92,7 @@ public class Main {
                 case 99:
                     System.out.println("bye!");
                     menu.close();
-                    id_string.close();
+                    input.close();
                     return;
                 default: System.out.println("concentration!");
             }
@@ -71,14 +101,23 @@ public class Main {
 
     }
 
+    public static String inputString(Scanner scanner, String description){
+        System.out.print(description);
+        String input="";
+        if(scanner.hasNextLine())
+            input=scanner.nextLine();
+        return input;
+    }
 
-    public boolean init(){
+
+    public static boolean init(String user, String pw){
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con= DriverManager.getConnection(
-                    "jdbc:mysql://192.168.56.101:4567/project",
-                    "hslee","1234");
-            Statement stmt=con.createStatement();
+                    "jdbc:mysql://"+mysqlAddress+"/"+databaseName+"",
+                    user,pw);
+            stmt=con.createStatement();
+            System.out.println("success to connect database");
         }
         catch(Exception e){
             System.out.println("fail to connect database");
@@ -87,46 +126,49 @@ public class Main {
         return true;
     }
 
-    public void printMenu(){
-        System.out.println("                                                                               ");
-        System.out.println("                                                                               ");
-        System.out.println("-------------------------------------------------------------------------------");
-        System.out.println("                              동아리 인원 관리 프로그램                            ");
-        System.out.println("-------------------------------------------------------------------------------");
-        System.out.println("  1. connection                         2.  find movement                      ");
-        System.out.println("  3. confirmation enterprise            4.  confirmation region                ");
-        System.out.println("  5. insert enterprise                  6.  insert movement                    ");
-        System.out.println("  7. insert Quarantine information      8.  comparison with movement           ");
-        System.out.println("  9. find not quarantined enterprise    10. Check distance to movement         ");
-        System.out.println("                                        99. quit                               ");
-        System.out.println("-------------------------------------------------------------------------------");
-    }
 
-    public void findMovement(){
+
+    //확진자의 동선
+    public static void findMovement(String confirmation_id){
 
     }
 
-    public void confirmationEnterprise(){
+    //특정 업체의 기록
+    public static void confirmationEnterprise(){
 
     }
 
-    public void insertEnterprise(){
+    //업체추가
+    public static void insertEnterprise(){
 
     }
 
-    public void insertMovement(){
+    //업체추가
+    public static void insertRegion(){
 
     }
-    public void insertQuarantineInformation(){
+
+    // 동선추가
+    public static void insertMovement(){
 
     }
-    public void ComparisonWithMovement(){
+    //방역정보 추가
+    public static void insertQuarantineInformation(){
 
     }
-    public void findNotQuarantinedEnterprise(){
+
+    //확진자 추가
+    public static void insertConfirmedCase(){
 
     }
-    public void CheckDistanceToMovement(){
+
+    //방역되지 않은 업체
+    public static void showNotQuarantinedEnterprise(){
+
+    }
+
+    //위험 업체와의 거리
+    public static void CheckDistanceToMovement(){
 
     }
 }
