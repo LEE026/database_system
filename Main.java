@@ -113,17 +113,55 @@ public class Main {
                     break;
                 }
 
-                case 7:
+                case 7:{
+                    System.out.println("추가할 방역 정보");
+                    String name=inputString(input,"업체 이름: ");
+                    String address=inputString(input,"업체 주소: ");
+                    String date=inputString(input,"방역 일자: ");
+                    String disinfection_company=inputString(input,"방역 업체: ");
+                    if(!name.isEmpty()&&!address.isEmpty()&&!date.isEmpty()) {
+                        insertQuarantineInformation(name,address,date,disinfection_company);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
-                case 8:
+                case 8:{
+                    System.out.println("추가할 확진자 정보");
+                    String id=inputString(input,"확진자 식별번호: ");
+                    String disease_code=inputString(input,"질병 코드: ");
+                    String date=inputString(input,"확진 일자: ");
+
+                    if(!id.isEmpty()) {
+                        insertConfirmedCase(id,disease_code,date);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
                 case 9: {
                     showNotQuarantinedEnterprise();
                     break;
                 }
-                case 10:
+                case 10:{
+                    System.out.println("현재 gps위치를 입력해주세요");
+                    Double longitude=-1.0;
+                    Double latitude=-1.0;
+                    System.out.print("경도: ");
+                    if(input.hasNextDouble())
+                        longitude=input.nextDouble();
+                    System.out.print("위도: ");
+                    if(input.hasNextDouble())
+                        latitude=input.nextDouble();
+
+                    if(longitude>0.0&&latitude>0.0) {
+                            CheckDistanceToMovement(longitude,latitude);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
                 case 99:
                     System.out.println("bye!");
@@ -264,13 +302,25 @@ public class Main {
         }
     }
     //방역정보 추가
-    public static void insertQuarantineInformation(){
+    public static void insertQuarantineInformation(String name,String address,String date, String disinfection_company){
+        String Query="INSERT INTO Quarantine_information VALUES ('"+name+"', '"+address+"','"+date+"', '"+disinfection_company+"');";
 
+        try {
+            stmt.executeUpdate(Query);
+        } catch (SQLException e) {
+            System.out.println("insert fail");
+        }
     }
 
     //확진자 추가
-    public static void insertConfirmedCase(){
+    public static void insertConfirmedCase(String id,String disease_code, String date){
+        String Query="INSERT INTO Confirmed_case VALUES ('"+id+"', '"+disease_code+"','"+date+"');";
 
+        try {
+            stmt.executeUpdate(Query);
+        } catch (SQLException e) {
+            System.out.println("insert fail");
+        }
     }
 
     //방역되지 않은 업체
@@ -289,8 +339,55 @@ public class Main {
         }
     }
 
-    //위험 업체와의 거리
-    public static void CheckDistanceToMovement(){
+    private static double deg2rad(double deg){
+        return (deg * Math.PI/180.0);
+    }
+    //radian(라디안)을 10진수로 변환
+    private static double rad2deg(double rad){
+        return (rad * 180 / Math.PI);
+    }
+
+    private static double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515 * 1609.344;
+
+        return dist; //단위 meter
+    }
+    //500m내 위험 업체와의 거리
+    public static void CheckDistanceToMovement(Double longitude,Double latitude){
+        String Query="select name as \"업체\", address as \"업체 주소\", longitude, latitude\n" +
+                "from (select  * from Enterprise e \n" +
+                "where abs(e.longitude-"+longitude+")<=0.005 \n" +
+                "and abs(e.latitude-"+latitude+")<=0.005) e \n" +
+                "natural join (select name, address\n" +
+                "from Movement m natural join Quarantine_information q\n" +
+                "where m.dateOfVisit > q.date\n" +
+                "order by dateOfVisit) c;\n";
+
+        try {
+            ResultSet rs=stmt.executeQuery(Query);
+            System.out.println("\n500 미터 내 위험업체 \n");
+            ResultSetMetaData column=rs.getMetaData();
+            int cnt=column.getColumnCount();
+            while(rs.next()){
+                int num=1;
+                double dist=distance(longitude,latitude,rs.getDouble(3),rs.getDouble(4));
+                if(dist<=500.0) {
+                    System.out.printf("#%d\n", num++);
+                    System.out.printf("%s: %s\n", column.getColumnLabel(1),rs.getString(1));
+                    System.out.printf("%s: %s\n", column.getColumnLabel(2),rs.getString(2));
+                    System.out.printf("위험 업체와의 거리: %.2fm\n\n", dist);
+                }
+            }
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println("Query fail");
+        }
 
     }
 }
+
+
