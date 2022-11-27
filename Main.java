@@ -287,12 +287,14 @@ public class Main {
                 rsMeta2= rs2.getMetaData();;
             int cnt=1;
             while(next1 && next2){
-                System.out.println("#"+cnt+"\n");
+                System.out.println("#"+cnt);
                 if(rs1.getDate(3).compareTo(rs2.getDate(3))<0){
+                    System.out.println("확진자 방문");
                     printOneResult(rs1,rsMeta1);
                     next1=rs1.next();
                 }
                 else {
+                    System.out.println("방역조치");
                     printOneResult(rs2,rsMeta2);
                     next2=rs2.next();
                 }
@@ -300,12 +302,14 @@ public class Main {
             }
 
             while(next1){
+                System.out.println("확진자 방문");
                 System.out.println("#"+cnt);
                 printOneResult(rs1,rsMeta1);
                 next1=rs1.next();
                 cnt++;
             }
             while(next2){
+                System.out.println("방역조치");
                 System.out.println("#"+cnt);
                 printOneResult(rs2,rsMeta2);
                 next2=rs2.next();
