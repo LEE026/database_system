@@ -424,11 +424,11 @@ public class Main {
                 "where m.dateOfVisit > q.date\n" +
                 "order by dateOfVisit) c;\n";
 
+
         try {
             ResultSet rs=stmt.executeQuery(Query);
             System.out.println("\n500 미터 내 위험업체 \n");
             ResultSetMetaData column=rs.getMetaData();
-            int cnt=column.getColumnCount();
             while(rs.next()){
                 int num=1;
                 double dist=distance(longitude,latitude,rs.getDouble(3),rs.getDouble(4));
