@@ -326,7 +326,7 @@ public class Main {
 
     //지역에서 발생중인 질병 리스트
     public static void confirmationRegion(String region){
-        String Query="select confirmation_disease_code as \"질병\" \n" +
+        String Query="select distinct confirmation_disease_code as \"질병\" \n" +
                 "from Movement natural join Confirmed_case \n" +
                 "where address like \"%"+region+"%\";";
         try {
