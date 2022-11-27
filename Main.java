@@ -21,6 +21,7 @@ public class Main {
 
 
     static Statement stmt;
+    static Statement stmt2;
     static String mysqlAddress="192.168.56.101:4567";
     static String databaseName="disease_notice_service";
 
@@ -72,8 +73,17 @@ public class Main {
                     break;
                 }
 
-                case 3:
+                case 3:{
+                    System.out.println("확진자 방문 및 방역조치 기록을 보고 싶은 업체");
+                    String name=inputString(input,"업체 이름: ");
+                    String address=inputString(input,"업체 주소: ");
+                    if(!name.isEmpty()&&!address.isEmpty()) {
+                        confirmationEnterprise(name,address);
+                    }else{
+                        System.out.println("concentration!");
+                    }
                     break;
+                }
 
                 case 4: {
                     String region=inputString(input,"확인을 원하는 지역: ");
@@ -191,6 +201,7 @@ public class Main {
                     "jdbc:mysql://"+mysqlAddress+"/"+databaseName+"",
                     user,pw);
             stmt=con.createStatement();
+            stmt2= con.createStatement();
             System.out.println("success to connect database");
         }
         catch(Exception e){
@@ -201,7 +212,13 @@ public class Main {
     }
 
 
-    public static void printOneResult(ResultSet rs,ResultSetMetaData column, int cnt) {
+    public static void printOneResult(ResultSet rs,ResultSetMetaData column) {
+        int cnt= 0;
+        try {
+            cnt = column.getColumnCount();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         for(int i=1;i<=cnt;i++){
             try {
                 System.out.printf("%s: %s\n",column.getColumnLabel(i),rs.getString(i));
@@ -215,16 +232,14 @@ public class Main {
     public static void printResult(ResultSet rs){
         try {
             ResultSetMetaData column=rs.getMetaData();
-            int cnt= column.getColumnCount();
 
             int num=1;
             while (rs.next()) {
                 System.out.printf("#%d\n",num++);
-                printOneResult(rs,column,cnt);
+                printOneResult(rs,column);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Query print fail");
         }
     }
@@ -248,21 +263,60 @@ public class Main {
 
     //특정 업체의 기록
     public static void confirmationEnterprise(String enterpriseName, String address){
-        String Query1="select name as \"업체\", address as \"업체 주소\", date as \"방역 일자\",  disinfection_company as \"방역 업체\"\n" +
-                "from Enterprise natural join Quarantine_information \n" +
-                "where name like \"%김포공항%\" and address like \"%방화동%\"\n" +
-                "order by date;";
-        String Query2="select name as \"업체\", address as \"업체 주소\", dateOfVisit as \"방문 일자\", confirmation_disease_code as \"확진된 질병\" \n" +
+        String Query1="select name as \"업체\", address as \"업체 주소\", dateOfVisit as \"방문 일자\", confirmation_disease_code as \"확진된 질병\" \n" +
                 "from Movement natural join Confirmed_case \n" +
-                "where name like \"%김포공항%\" and address like \"%방화동%\"\n" +
+                "where name like \""+enterpriseName+"\" and address like \""+address+"\"\n" +
                 "order by dateOfVisit;";
+
+        String Query2="select name as \"업체\", address as \"업체 주소\", date as \"방역 일자\",  disinfection_company as \"방역 업체\"\n" +
+                "from Enterprise natural join Quarantine_information \n" +
+                "where name like \""+enterpriseName+"\" and address like \""+address+"\"\n" +
+                "order by date;";
+
         try {
             ResultSet rs1=stmt.executeQuery(Query1);
-            ResultSet rs2=stmt.executeQuery(Query2);
+            ResultSet rs2=stmt2.executeQuery(Query2);
+            ResultSetMetaData rsMeta1 = null;
+            ResultSetMetaData rsMeta2 = null;
+            boolean next1=rs1.next();
+            boolean next2=rs2.next();
+
+            System.out.printf("\n%s %s의 확진자 방문 및 방역 조치 기록\n",address,enterpriseName);
+            if(next1)
+                rsMeta1= rs1.getMetaData();
+            if (next2)
+                rsMeta2= rs2.getMetaData();;
+            int cnt=1;
+            while(next1 && next2){
+                System.out.println("#"+cnt+"\n");
+                if(rs1.getDate(3).compareTo(rs2.getDate(3))<0){
+                    printOneResult(rs1,rsMeta1);
+                    next1=rs1.next();
+                }
+                else {
+                    printOneResult(rs2,rsMeta2);
+                    next2=rs2.next();
+                }
+                cnt++;
+            }
+
+            while(next1){
+                System.out.println("#"+cnt);
+                printOneResult(rs1,rsMeta1);
+                next1=rs1.next();
+                cnt++;
+            }
+            while(next2){
+                System.out.println("#"+cnt);
+                printOneResult(rs2,rsMeta2);
+                next2=rs2.next();
+                cnt++;
+            }
 
             rs1.close();
             rs2.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             System.out.println("Query fail");
         }
     }
