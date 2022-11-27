@@ -31,7 +31,6 @@ public class Main {
         Scanner menu = new Scanner(System.in);
         Scanner input = new Scanner(System.in);
         int number = 0;
-        init("hslee","1234");//테스트 편의를 위한 문장, 제작종료후 삭제 예정
         while(true)
         {
             printMenu();
